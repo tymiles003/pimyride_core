@@ -47,7 +47,7 @@ def decrypt_dtc_code(code):
         if len(current) < 4:
             raise "Tried to decode bad DTC: %s" % code
 
-        tc = obd_sensors.hex_to_int(current[0]) #typecode
+        tc = obd_sensors.hex_to_int(current[0])  # typecode
         tc = tc >> 2
         if tc == 0:
             type = "P"
@@ -82,14 +82,14 @@ class OBDPort:
         sb = 1                   # stop bits
         to = SERTIMEOUT
         self.ELMver = "Unknown"
-        self.State = 1 #state SERIAL is 1 connected, 0 disconnected (connection failed)
+        self.State = 1  # state SERIAL is 1 connected, 0 disconnected (connection failed)
         self.port = None
 
         self._notify_window = _notify_window
         debug_display(self._notify_window, 1, "Opening interface (serial port)")
 
         try:
-            self.port = serial.Serial(portnum, baud, \
+            self.port = serial.Serial(portnum, baud,
                                       parity=par, stopbits=sb, bytesize=databits, timeout=to)
 
         except serial.SerialException as e:
@@ -153,19 +153,19 @@ class OBDPort:
 
         # 9 seems to be the length of the shortest valid response
         if len(code) < 7:
-            #raise Exception("BogusCode")
+            # raise Exception("BogusCode")
             print "boguscode?" + code
 
         # get the first thing returned, echo should be off
         code = string.split(code, "\r")
         code = code[0]
 
-        #remove whitespace
+        # remove whitespace
         code = string.split(code)
         code = string.join(code, "")
 
-        #cables can behave differently
-        if code[:6] == "NODATA": # there is no such sensor
+        # cables can behave differently
+        if code[:6] == "NODATA":  # there is no such sensor
             return "NODATA"
 
         # first 4 characters are code from ELM
@@ -174,7 +174,7 @@ class OBDPort:
 
     def get_result(self):
         """Internal use only: not a public interface"""
-        #time.sleep(0.01)
+        # time.sleep(0.01)
         repeat_count = 0
         if self.port is not None:
             buffer = ""
@@ -193,10 +193,10 @@ class OBDPort:
                 if c == ">":
                     break;
 
-                if buffer != "" or c != ">": #if something is in buffer, add everything
+                if buffer != "" or c != ">":  # if something is in buffer, add everything
                     buffer = buffer + c
 
-            #debug_display(self._notify_window, 3, "Get result:" + buffer)
+            # debug_display(self._notify_window, 3, "Get result:" + buffer)
             if (buffer == ""):
                 return None
             return buffer
@@ -238,17 +238,17 @@ class OBDPort:
     def get_tests_MIL(self):
         statusText = ["Unsupported", "Supported - Completed", "Unsupported", "Supported - Incompleted"]
 
-        statusRes = self.sensor(1)[1] #GET values
-        statusTrans = [] #translate values to text
+        statusRes = self.sensor(1)[1]  # GET values
+        statusTrans = []  # translate values to text
 
-        statusTrans.append(str(statusRes[0])) #DTCs
+        statusTrans.append(str(statusRes[0]))  # DTCs
 
-        if statusRes[1] == 0: #MIL
+        if statusRes[1] == 0:  # MIL
             statusTrans.append("Off")
         else:
             statusTrans.append("On")
 
-        for i in range(2, len(statusRes)): #Tests
+        for i in range(2, len(statusRes)):  # Tests
             statusTrans.append(statusText[statusRes[i]])
 
         return statusTrans
@@ -261,7 +261,7 @@ class OBDPort:
         """Returns a list of all pending DTC codes. Each element consists of
         a 2-tuple: (DTC code (string), Code description (string) )"""
         dtcLetters = ["P", "C", "B", "U"]
-        r = self.sensor(1)[1] #data
+        r = self.sensor(1)[1]  # data
         dtcNumber = r[0]
         mil = r[1]
         DTCCodes = []
@@ -274,10 +274,10 @@ class OBDPort:
             print "DTC result:" + res
             for i in range(0, 3):
                 val1 = hex_to_int(res[3 + i * 6:5 + i * 6])
-                val2 = hex_to_int(res[6 + i * 6:8 + i * 6]) #get DTC codes from response (3 DTC each 2 bytes)
-                val = (val1 << 8) + val2 #DTC val as int
+                val2 = hex_to_int(res[6 + i * 6:8 + i * 6])  # get DTC codes from response (3 DTC each 2 bytes)
+                val = (val1 << 8) + val2  # DTC val as int
 
-                if val == 0: #skip fill of last packet
+                if val == 0:  # skip fill of last packet
                     break
 
                 DTCStr = dtcLetters[(val & 0xC000) > 14] + str((val & 0x3000) >> 12) + str((val & 0x0f00) >> 8) + str(
@@ -289,16 +289,16 @@ class OBDPort:
         self.send_command(GET_FREEZE_DTC_COMMAND)
         res = self.get_result()
 
-        if res[:7] == "NO DATA": #no freeze frame
+        if res[:7] == "NO DATA":  # no freeze frame
             return DTCCodes
 
         print "DTC freeze result:" + res
         for i in range(0, 3):
             val1 = hex_to_int(res[3 + i * 6:5 + i * 6])
-            val2 = hex_to_int(res[6 + i * 6:8 + i * 6]) #get DTC codes from response (3 DTC each 2 bytes)
-            val = (val1 << 8) + val2 #DTC val as int
+            val2 = hex_to_int(res[6 + i * 6:8 + i * 6])  # get DTC codes from response (3 DTC each 2 bytes)
+            val = (val1 << 8) + val2  # DTC val as int
 
-            if val == 0: #skip fill of last packet
+            if val == 0:  # skip fill of last packet
                 break
 
             DTCStr = dtcLetters[(val & 0xC000) > 14] + str((val & 0x3000) >> 12) + str((val & 0x0f00) >> 8) + str(
@@ -326,4 +326,3 @@ class OBDPort:
                 line = "%.6f,\t%s\n" % (now - start_time, data[1])
                 file.write(line)
                 file.flush()
-          

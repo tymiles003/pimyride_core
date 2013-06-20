@@ -43,4 +43,3 @@ try:
 except ImportError as e:
     def debug_display(window, position, message):
         print message
-    

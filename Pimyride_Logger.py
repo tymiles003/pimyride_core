@@ -105,22 +105,21 @@ class PiMyRide_Logger():
             self.log_csv.write(log_data + "\n")  # write to csv
             print '\n'
 
-
-def ensure_dir(f):  # Make a new directory for each day will make managing the logs easier
-    d = os.path.dirname(f)
-    if not os.path.exists(d):  # check if directory exists if it does not create it
-        os.makedirs(d)
+    def ensure_dir(self, f):  # Make a new directory for each day will make managing the logs easier
+        d = os.path.dirname(f)
+        if not os.path.exists(d):  # check if directory exists if it does not create it
+            os.makedirs(d)
 
 
 dir_date = datetime.now()
 path = datetime.now().strftime('%d-%b-%Y')
 
-ensure_dir("/home/pi/logs/" + path + "/")  # ensure the dir is available
-
 log_sensors = ["rpm", "speed", "throttle_pos", "load", "temp", "intake_air_temp", "manifold_pressure", "maf"]
 logger = PiMyRide_Logger("/home/pi/logs/" + path + "/", log_sensors)
+logger.ensure_dir("/home/pi/logs/" + path + "/")  # ensure the dir is available
 logger.connect()
+
 if not logger.is_connected():
     print "Not connected"
-logger.Start_Logging()
 
+logger.Start_Logging()

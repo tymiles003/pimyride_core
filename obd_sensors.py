@@ -28,10 +28,8 @@ def hex_to_int(str):
 
 
 def maf(code):
-#code = hex_to_int(code)
-#return code * 0.00132276
-    numA = hex_to_int(code[:2]) #A byte
-    numB = hex_to_int(code[2:4]) #B byte
+    numA = hex_to_int(code[:2])  # A byte
+    numB = hex_to_int(code[2:4])  # B byte
     code = (numA * 256 + numB) / 100.0
     return code
 
@@ -41,10 +39,8 @@ def throttle_pos(code):
     return code * 100.0 / 255.0
 
 
-def intake_m_pres(code): # in kPa
-    #code = hex_to_int(code)
-    #return code / 0.14504
-    numA = hex_to_int(code[:2]) #A byte
+def intake_m_pres(code):  # in kPa
+    numA = hex_to_int(code[:2])  # A byte
     kpa = numA
     return kpa
 
@@ -97,10 +93,10 @@ def fuel_trim_percent(code):
 
 def dtc_decrypt(code):
     #first byte is byte after PID and without spaces
-    num = hex_to_int(code[:2]) #A byte
+    num = hex_to_int(code[:2])  # A byte
     res = []
 
-    if num & 0x80: # is mil light on
+    if num & 0x80:  # is mil light on
         mil = 1
     else:
         mil = 0
@@ -111,13 +107,13 @@ def dtc_decrypt(code):
     res.append(num)
     res.append(mil)
 
-    numB = hex_to_int(code[2:4]) #B byte
+    numB = hex_to_int(code[2:4])  # B byte
 
     for i in range(0, 3):
         res.append(((numB >> i) & 0x01) + ((numB >> (3 + i)) & 0x02))
 
-    numC = hex_to_int(code[4:6]) #C byte
-    numD = hex_to_int(code[6:8]) #D byte
+    numC = hex_to_int(code[4:6])  # C byte
+    numD = hex_to_int(code[6:8])  # D byte
 
     for i in range(0, 7):
         res.append(((numC >> i) & 0x01) + (((numD >> i) & 0x01) << 1))
@@ -205,8 +201,8 @@ def pid151(code):
 
 
 def pid15e(code):
-    numA = hex_to_int(code[:2]) #A byte
-    numB = hex_to_int(code[2:4]) #B byte
+    numA = hex_to_int(code[:2])  # A byte
+    numB = hex_to_int(code[2:4])  # B byte
     l = (numA * 256 + numB) * 0.05
     return l
 
